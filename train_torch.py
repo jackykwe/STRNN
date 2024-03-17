@@ -9,13 +9,22 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import tqdm
 from torch.autograd import Variable
+from tqdm.auto import tqdm
+
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+    ftype = torch.cuda.FloatTensor
+    ltype = torch.cuda.LongTensor
+else:
+    device = torch.device("cpu")
+    ftype = torch.FloatTensor
+    ltype = torch.LongTensor
 
 # Parameters
 # ==================================================
-ftype = torch.cuda.FloatTensor
-ltype = torch.cuda.LongTensor
+# ftype = torch.cuda.FloatTensor
+# ltype = torch.cuda.LongTensor
 
 # Data loading params
 train_file = "./prepro_train_50.txt"
@@ -129,7 +138,7 @@ def print_score(batches, step):
     recall10000 = 0.
     iter_cnt = 0
 
-    for batch in tqdm.tqdm(batches, desc="validation"):
+    for batch in tqdm(batches, desc="validation"):
         batch_user, batch_td, batch_ld, batch_loc, batch_dst = batch
         if len(batch_loc) < 3:
             continue
@@ -187,14 +196,14 @@ def run(user, td, ld, loc, dst, step):
     return J.data.cpu().numpy()
 
 ###############################################################################################
-strnn_model = STRNNCell(dim).cuda()
+strnn_model = STRNNCell(dim).to(device)
 optimizer = torch.optim.SGD(parameters(), lr=learning_rate, momentum=momentum, weight_decay=reg_lambda)
 
-for i in xrange(num_epochs):
+for i in tqdm(xrange(num_epochs), desc="epoch"):
     # Training
     total_loss = 0.
     train_batches = list(zip(train_user, train_td, train_ld, train_loc, train_dst))
-    for j, train_batch in enumerate(tqdm.tqdm(train_batches, desc="train")):
+    for j, train_batch in enumerate(tqdm(train_batches, desc="train", leave=False)):
         #inner_batches = data_loader.inner_iter(train_batch, batch_size)
         #for k, inner_batch in inner_batches:
         batch_user, batch_td, batch_ld, batch_loc, batch_dst = train_batch#inner_batch)
@@ -209,6 +218,18 @@ for i in xrange(num_epochs):
         #print("Evaluation at epoch #{:d}: ".format(i+1)), total_loss/j, datetime.datetime.now()
         valid_batches = list(zip(valid_user, valid_td, valid_ld, valid_loc, valid_dst))
         print_score(valid_batches, step=2)
+
+    torch.save(
+        {
+            "epoch": i,
+            "model_state_dict": strnn_model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "loss": total_loss
+        },
+        f"saved_models/checkpoint_epoch{i}.pt"
+    )
+
+torch.save(strnn_model.state_dict(), f"saved_models/pretrained.pt")
 
 # Testing
 print("Training End..")

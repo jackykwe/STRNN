@@ -12,10 +12,19 @@ import torch.nn.functional as F
 import tqdm
 from torch.autograd import Variable
 
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+    ftype = torch.cuda.FloatTensor
+    ltype = torch.cuda.LongTensor
+else:
+    device = torch.device("cpu")
+    ftype = torch.FloatTensor
+    ltype = torch.LongTensor
+
 # Parameters
 # ==================================================
-ftype = torch.cuda.FloatTensor
-ltype = torch.cuda.LongTensor
+# ftype = torch.cuda.FloatTensor
+# ltype = torch.cuda.LongTensor
 
 # Data loading params
 train_file = "../dataset/loc-gowalla_totalCheckins.txt"
@@ -138,7 +147,7 @@ def run(user, time, lati, longi, loc, step):
     rnn_output = strnn_model(user, time, lati, longi, loc, step)#, neg_lati, neg_longi, neg_loc, step)
 
 ###############################################################################################
-strnn_model = STRNNModule().cuda()
+strnn_model = STRNNModule().to(device)
 
 print("Making train file...")
 f = open("./prepro_train_%s.txt"%lw_time, 'w')
