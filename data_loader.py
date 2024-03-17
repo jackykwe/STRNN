@@ -1,6 +1,8 @@
-import numpy as np
 from datetime import datetime
+
+import numpy as np
 import pandas as pd
+
 
 def treat_prepro(train, step):
     train_f = open(train, 'r')
@@ -27,7 +29,7 @@ def treat_prepro(train, step):
     for i, line in enumerate(lines):
         tokens = line.strip().split('\t')
         if len(tokens) < 3:
-            if user_td: 
+            if user_td:
                 train_user.append(user)
                 train_td.append(user_td)
                 train_ld.append(user_ld)
@@ -48,7 +50,7 @@ def treat_prepro(train, step):
         user_loc.append(loc)
         user_dst.append(dst)
 
-    if user_td: 
+    if user_td:
         train_user.append(user)
         train_td.append(user_td)
         train_ld.append(user_ld)

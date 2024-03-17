@@ -1,15 +1,16 @@
 #! /usr/bin/env python
 
-import os
-import datetime
 import csv
-import tqdm
+import datetime
+import os
+
+import data_loader
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import tqdm
 from torch.autograd import Variable
-import data_loader
 
 # Parameters
 # ==================================================
@@ -139,7 +140,7 @@ def run(user, time, lati, longi, loc, step):
 ###############################################################################################
 strnn_model = STRNNModule().cuda()
 
-print "Making train file..."
+print("Making train file...")
 f = open("./prepro_train_%s.txt"%lw_time, 'w')
 # Training
 train_batches = list(zip(train_time, train_lati, train_longi, train_loc))
@@ -148,7 +149,7 @@ for j, train_batch in enumerate(tqdm.tqdm(train_batches, desc="train")):
     run(train_user[j], batch_time, batch_lati, batch_longi, batch_loc, step=1)
 f.close()
 
-print "Making valid file..."
+print("Making valid file...")
 f = open("./prepro_valid_%s.txt"%lw_time, 'w')
 # Eavludating
 valid_batches = list(zip(valid_time, valid_lati, valid_longi, valid_loc))
@@ -157,7 +158,7 @@ for j, valid_batch in enumerate(tqdm.tqdm(valid_batches, desc="valid")):
     run(valid_user[j], batch_time, batch_lati, batch_longi, batch_loc, step=2)
 f.close()
 
-print "Making test file..."
+print("Making test file...")
 f = open("./prepro_test_%s.txt"%lw_time, 'w')
 # Testing
 test_batches = list(zip(test_time, test_lati, test_longi, test_loc))

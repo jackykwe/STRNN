@@ -1,15 +1,16 @@
 #! /usr/bin/env python
 
-import os
 import datetime
 import math
-import tqdm
+import os
+
+import data_loader
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import tqdm
 from torch.autograd import Variable
-import data_loader
 
 # Parameters
 # ==================================================
